@@ -31,4 +31,9 @@ jobs:
         git config user.email "actions@github.com"
         git add .
         git commit -m "Update with tag: ${{ steps.get_tag.outputs.tag_name }}"
-        git push
+
+    - name: Push Changes
+      uses: ad-m/github-push-action@master
+      with:
+        branch: ${{ github.event.pull_request.head.ref }}
+        github_token: ${{ secrets.APP_CI_PAT }}
