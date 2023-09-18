@@ -34,7 +34,6 @@ jobs:
 
     - name: Commit and push
       run: |
-        echo "${{ github.ref_name }}"
         git status
         git add .
         git commit -m "Update with tag: ${{ steps.get_tag.outputs.tag_name }}"
