@@ -3,7 +3,7 @@ name: Update Node App
 on:
   push:
     tags:
-      - '*'
+      - 'release-*'
 
 jobs:
   update:
@@ -19,13 +19,20 @@ jobs:
         run: |
           TAG=$(git describe --tags --abbrev=0)
           echo "Current Git tag is $TAG"
-          echo "##[set-output name=tag]${TAG}"
+          echo "##[set-output name=release_tag]${TAG}"
         id: get_tag
+
+      - name: Set new Git tag
+        run: |
+          TAG="${${{ steps.get_tag.outputs.release_tag }}#release-}"
+          echo "Current Git tag is $TAG"
+          echo "##[set-output name=tag]${TAG}"
+        id: new_tag
 
       - name: Remove Git Tag
         run: |
-          git tag -d ${{ steps.get_tag.outputs.tag }}
-          git push origin --delete ${{ steps.get_tag.outputs.tag }}
+          git tag -d ${{ steps.new_tag.outputs.tag }}
+          git push origin --delete ${{ steps.new_tag.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -35,7 +42,7 @@ jobs:
           node-version: '18.12' # 你可以根据你的项目需求选择不同的 Node.js 版本
 
       - name: Run update.js
-        run: node update.js ${{ steps.get_tag.outputs.tag }}
+        run: node update.js ${{ steps.new_tag.outputs.tag }}
 
       - name: git Config
         run: |
@@ -46,6 +53,6 @@ jobs:
         run: |
           git status
           git add .
-          git commit -m "Update with tag: ${{ steps.get_tag.outputs.tag }}"
-          git tag ${{ steps.get_tag.outputs.tag }}
-          git push origin ${{ steps.get_tag.outputs.tag }}
+          git commit -m "Update with tag: ${{ steps.new_tag.outputs.tag }}"
+          git tag ${{ steps.new_tag.outputs.tag }}
+          git push origin ${{ steps.new_tag.outputs.tag }}
