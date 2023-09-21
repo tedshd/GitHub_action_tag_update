@@ -17,22 +17,22 @@ jobs:
 
       - name: Get current Git tag
         run: |
-          TAG=$(git describe --tags --abbrev=0)
-          echo "Current Git tag is $TAG"
-          echo "##[set-output name=release_tag]${TAG}"
-        id: get_tag
+          TAG_CURRENT=$(git describe --tags --abbrev=0)
+          echo "Current Git tag is $TAG_CURRENT"
+          echo "##[set-output name=release_tag]${TAG_CURRENT}"
+        id: current_tag
 
       - name: Set new Git tag
         run: |
-          TAG="${${{ steps.get_tag.outputs.release_tag }}#release-}"
-          echo "Current Git tag is $TAG"
-          echo "##[set-output name=tag]${TAG}"
+          TAG_NEW="${${{ steps.current_tag.outputs.release_tag }}#release-}"
+          echo "New Git tag is $TAG_NEW"
+          echo "##[set-output name=tag]${TAG_NEW}"
         id: new_tag
 
       - name: Remove Git Tag
         run: |
-          git tag -d ${{ steps.new_tag.outputs.tag }}
-          git push origin --delete ${{ steps.new_tag.outputs.tag }}
+          git tag -d ${{ steps.current_tag.outputs.release_tag }}
+          git push origin --delete ${{ steps.current_tag.outputs.release_tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
