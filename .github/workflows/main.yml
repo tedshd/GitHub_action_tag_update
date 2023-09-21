@@ -56,6 +56,6 @@ jobs:
           git status
           git add .
           git commit -m "Update with tag: ${{ steps.new_tag.outputs.tag }}"
-          git pull origin master
+          git pull origin master # 實作時發現需要先 pull 再 push，否則會出現錯誤
           git tag ${{ steps.new_tag.outputs.tag }}
           git push origin HEAD:master ${{ steps.new_tag.outputs.tag }}
