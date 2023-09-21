@@ -24,7 +24,8 @@ jobs:
 
       - name: Set new Git tag
         run: |
-          TAG_NEW="${${{ steps.current_tag.outputs.release_tag }}#release-}"
+          TAG_CURRENT=$(git describe --tags --abbrev=0)
+          TAG_NEW="${$TAG_CURRENT#release-}"
           echo "New Git tag is $TAG_NEW"
           echo "##[set-output name=tag]${TAG_NEW}"
         id: new_tag
@@ -55,4 +56,4 @@ jobs:
           git add .
           git commit -m "Update with tag: ${{ steps.new_tag.outputs.tag }}"
           git tag ${{ steps.new_tag.outputs.tag }}
-          git push origin ${{ steps.new_tag.outputs.tag }}
+          git push origin HEAD:master ${{ steps.new_tag.outputs.tag }}
