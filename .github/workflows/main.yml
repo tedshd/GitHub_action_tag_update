@@ -55,6 +55,6 @@ jobs:
           git status
           git add .
           git commit -m "Update with tag: ${{ steps.new_tag.outputs.tag }}"
-          git pull origin
+          git pull origin master
           git tag ${{ steps.new_tag.outputs.tag }}
           git push origin HEAD:master ${{ steps.new_tag.outputs.tag }}
