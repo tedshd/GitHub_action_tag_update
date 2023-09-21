@@ -24,8 +24,8 @@ jobs:
 
       - name: Set new Git tag
         run: |
-          TAG_NEW=$(git describe --tags --abbrev=0)
-          TAG_NEW="${$TAG_NEW#release-}"
+          TAG_NEW="${{ steps.current_tag.outputs.release_tag }}"
+          TAG_NEW="${TAG_NEW#release-}"  # 去掉 "release-" 前缀
           echo "New Git tag is $TAG_NEW"
           echo "##[set-output name=tag]${TAG_NEW}"
         id: new_tag
