@@ -10,31 +10,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.PAT_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
 
-    - name: Get tag name
-      id: get_tag
-      run: echo "::set-output name=tag_name::$(git tag --points-at ${{ github.sha }})"
+      - name: Get current Git tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          echo "Current Git tag is $TAG"
+          echo "##[set-output name=tag]${TAG}"
+        id: get_tag
 
-    - name: Use Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18.12' # 你可以根据你的项目需求选择不同的 Node.js 版本
+      - name: Remove Git Tag
+        run: |
+          git tag -d ${{ steps.get_tag.outputs.tag }}
+          git push origin --delete ${{ steps.get_tag.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Run update.js
-      run: node update.js ${{ steps.get_tag.outputs.tag_name }}
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.12' # 你可以根据你的项目需求选择不同的 Node.js 版本
 
-    - name: Config
-      run: |
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
+      - name: Run update.js
+        run: node update.js ${{ steps.get_tag.outputs.tag }}
 
-    - name: Commit and push
-      run: |
-        git status
-        git add .
-        git commit -m "Update with tag: ${{ steps.get_tag.outputs.tag_name }}"
-        git push origin HEAD:master
+      - name: git Config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: git Commit
+        run: |
+          git status
+          git add .
+          git commit -m "Update with tag: ${{ steps.get_tag.outputs.tag }}"
+          git tag ${{ steps.get_tag.outputs.tag }}
+          git push origin ${{ steps.get_tag.outputs.tag }}
+
+      - name: git Push
+        run: |
+          git push origin HEAD:master
